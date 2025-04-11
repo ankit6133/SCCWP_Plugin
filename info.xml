@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pluginInfo>
+
+    <integration type="Automation"/>
+
+    <tool-description>
+        This is a security automation plugin for Devops Deploy
+    </tool-description>
+
+    <!-- Do not change the release-version, the build process injects it. -->
+    <release-version>1.0.0</release-version>
+    <release-notes>
+        <release-note plugin-version="1">
+            Initial Version
+        </release-note>
+    </release-notes>
+</pluginInfo>

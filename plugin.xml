@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1">
+  <header>
+    <identifier id="com.ibm.ucd.sample.security.compliance" version="6" name="Security And Compliance Center WP"/>
+    <description>This is a Security and Compliance Center plugin for UCD</description>
+    <tag>Security and Compliance Center WP</tag>
+  </header>
+
+  <!-- Run Security and Compliance Center Test -->
+  <step-type name="Run Security and Compliance Testing">
+    <description>Run Security Scanning</description>
+    <properties>
+      <property name="SECURE_API_TOKEN" required="true">
+         <property-ui description="API Token for security compliance center"
+                      label="Secure API Token" type="secureBox"/>
+      </property>
+      <property name="url" required="true">
+         <property-ui description="Security and Compliance Center WP URL"
+                      label="URL" type="textBox"/>
+      </property>
+      <property name="image" required="true">
+         <property-ui description="Docker image name. Example: devops/web-app-new:latest"
+                      label="Docker image name" type="textBox"/>
+      </property>
+    </properties>
+    <post-processing>
+      <![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put("Status", "Failure");
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+      ]]>
+    </post-processing>
+    <command program="/bin/bash">
+      <arg value="-c"/>
+      <arg value="echo 'Setting API Token...'; export SECURE_API_TOKEN=${SECURE_API_TOKEN}; echo 'Running Sysdig Scanner...'; /root/sysdig-cli-scanner -a ${url} ${image} | tee /opt/ibm-ucd/agent/var/work/Docker-App/scan-logs/sysdig.log"/>
+    </command>
+  </step-type>
+
+  <!-- Start Runtime Security -->
+  <step-type name="Start Runtime Continuous Security Scanning">
+    <description>Start Runtime Security Scanning</description>
+    <properties>
+      <property name="SECURE_API_TOKEN" required="true">
+         <property-ui description="API Token for the security compliance center"
+                      label="Secure API Token" type="secureBox"/>
+      </property>
+      <property name="COLLECTOR_ENDPOINT" required="true">
+         <property-ui description="Endpoint for the collector"
+                      label="Collector Endpoint" type="textBox"/>
+      </property>
+      <property name="TAG_DATA" required="true">
+         <property-ui description="Tags to be associated with the agent"
+                      label="Tag Data" type="textBox"/>
+      </property>
+      <property name="SCRIPT_DIR" required="true">
+         <property-ui description="Directory where the install-agent.sh file is located. Like /opt/scripts"
+                      label="Script Dir" type="textBox"/>
+      </property>
+      
+    </properties>
+    <post-processing>
+      <![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put("Status", "Failure");
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+      ]]>
+    </post-processing>
+    <command program="/bin/bash">
+      <arg value="-c"/>
+      <arg value="echo 'Starting Sysdig Runtime Security installation...'; ${SCRIPT_DIR}/install-agent.sh -a ${SECURE_API_TOKEN} -c ${COLLECTOR_ENDPOINT} --collector_port 6443 --tags ${TAG_DATA} --secure true --additional_conf 'sysdig_api_endpoint: ${COLLECTOR_ENDPOINT}\\nhost_scanner:\\n enabled: true\\n scan_on_start: true\\nkspm_analyzer:\\n enabled: true'"/>
+      </command>
+  </step-type>
+
+</plugin>
