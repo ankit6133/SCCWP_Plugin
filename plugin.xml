@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1">
   <header>
-    <identifier id="com.ibm.ucd.sample.security.compliance" version="17" name="Security And Compliance Center WP"/>
+    <identifier id="com.ibm.ucd.sample.security.compliance" version="18" name="Security And Compliance Center WP"/>
     <description>This is a Security and Compliance Center plugin for UCD</description>
     <tag>Security and Compliance Center WP</tag>
   </header>
@@ -73,6 +73,11 @@
                       label="Collector Endpoint" type="textBox"/>
       </property>
 
+      <property name="COLLECTOR_API_ENDPOINT" required="true">
+        <property-ui description="Endpoint for the collector. (Wihout https)"
+                     label="Collector API Endpoint" type="textBox"/>
+     </property>
+
       <property name="COLLECTOR_PORT" required="true">
         <property-ui description="Port for the collector"
                      label="Collector Port" type="textBox"/>
@@ -99,7 +104,7 @@
     </post-processing>
     <command program="/bin/bash">
       <arg value="-c"/>
-      <arg value="echo 'Starting Sysdig Runtime Security installation...'; cp /root/install-agent.sh ${AGENT_HOME}/install-agent.sh; chmod +x ${AGENT_HOME}/install-agent.sh; ${AGENT_HOME}/install-agent.sh -a ${SECURE_API_TOKEN} -c ${COLLECTOR_ENDPOINT} --collector_port ${COLLECTOR_PORT} --tags ${TAG_DATA} --secure true --additional_conf 'sysdig_api_endpoint: ${COLLECTOR_ENDPOINT}\\nhost_scanner:\\n enabled: true\\n scan_on_start: true\\nkspm_analyzer:\\n enabled: true'; exit $?"/>
+      <arg value="echo 'Starting Sysdig Runtime Security installation...'; rm /opt/draios/etc/dragent.yaml; cp /root/install-agent.sh ${AGENT_HOME}/install-agent.sh; chmod +x ${AGENT_HOME}/install-agent.sh; ${AGENT_HOME}/install-agent.sh -a ${SECURE_API_TOKEN} -c ${COLLECTOR_ENDPOINT} --collector_port ${COLLECTOR_PORT} --tags ${TAG_DATA} --secure true --additional_conf 'sysdig_api_endpoint: ${COLLECTOR_API_ENDPOINT}\nhost_scanner:\n enabled: true\n scan_on_start: true\nkspm_analyzer:\n enabled: true'; exit 0"/>
     </command>
   </step-type>
 
