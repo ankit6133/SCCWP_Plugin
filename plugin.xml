@@ -1,10 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1">
   <header>
-    <identifier id="com.ibm.ucd.sample.security.compliance" version="6" name="Security And Compliance Center WP"/>
+    <identifier id="com.ibm.ucd.sample.security.compliance" version="17" name="Security And Compliance Center WP"/>
     <description>This is a Security and Compliance Center plugin for UCD</description>
     <tag>Security and Compliance Center WP</tag>
   </header>
+
+<!-- Run Security and Compliance Center Test -->
+<step-type name="Install Security and Compliance Scanner">
+  <description>Install Security Scanner</description>
+  <properties></properties>
+  <post-processing>
+    <![CDATA[
+      if (properties.get("exitCode") != 0) {
+          properties.put("Status", "Failure");
+      }
+      else {
+          properties.put("Status", "Success");
+      }
+    ]]>
+  </post-processing>
+  <command program="/bin/bash">
+    <arg value="-c"/>
+    <arg value="echo Installing SCCWP Scanner...; VERSION=$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt); curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$VERSION/linux/amd64/sysdig-cli-scanner; chmod +x sysdig-cli-scanner; exit $?"/>
+  </command>
+  
+</step-type>
 
   <!-- Run Security and Compliance Center Test -->
   <step-type name="Run Security and Compliance Testing">
@@ -15,7 +36,7 @@
                       label="Secure API Token" type="secureBox"/>
       </property>
       <property name="url" required="true">
-         <property-ui description="Security and Compliance Center WP URL"
+         <property-ui description="Security and Compliance Center WP URL. (With https)"
                       label="URL" type="textBox"/>
       </property>
       <property name="image" required="true">
@@ -35,7 +56,7 @@
     </post-processing>
     <command program="/bin/bash">
       <arg value="-c"/>
-      <arg value="echo 'Setting API Token...'; export SECURE_API_TOKEN=${SECURE_API_TOKEN}; echo 'Running Sysdig Scanner...'; /root/sysdig-cli-scanner -a ${url} ${image} | tee /opt/ibm-ucd/agent/var/work/Docker-App/scan-logs/sysdig.log"/>
+      <arg value="echo 'Setting API Token...'; export SECURE_API_TOKEN=${SECURE_API_TOKEN}; echo 'Running Sysdig Scanner...'; /root/sysdig-cli-scanner -a ${url} ${image} exit $?"/>
     </command>
   </step-type>
 
@@ -48,15 +69,20 @@
                       label="Secure API Token" type="secureBox"/>
       </property>
       <property name="COLLECTOR_ENDPOINT" required="true">
-         <property-ui description="Endpoint for the collector"
+         <property-ui description="Endpoint for the collector. (Wihout https)"
                       label="Collector Endpoint" type="textBox"/>
       </property>
+
+      <property name="COLLECTOR_PORT" required="true">
+        <property-ui description="Port for the collector"
+                     label="Collector Port" type="textBox"/>
+     </property>
       <property name="TAG_DATA" required="true">
          <property-ui description="Tags to be associated with the agent"
                       label="Tag Data" type="textBox"/>
       </property>
-      <property name="SCRIPT_DIR" required="true">
-         <property-ui description="Directory where the install-agent.sh file is located. Like /opt/scripts"
+      <property name="SCRIPT_DIR" required="false">
+         <property-ui description="Directory where the install-agent.sh file is located on server. Default /root"
                       label="Script Dir" type="textBox"/>
       </property>
       
@@ -73,8 +99,8 @@
     </post-processing>
     <command program="/bin/bash">
       <arg value="-c"/>
-      <arg value="echo 'Starting Sysdig Runtime Security installation...'; ${SCRIPT_DIR}/install-agent.sh -a ${SECURE_API_TOKEN} -c ${COLLECTOR_ENDPOINT} --collector_port 6443 --tags ${TAG_DATA} --secure true --additional_conf 'sysdig_api_endpoint: ${COLLECTOR_ENDPOINT}\\nhost_scanner:\\n enabled: true\\n scan_on_start: true\\nkspm_analyzer:\\n enabled: true'"/>
-      </command>
+      <arg value="echo 'Starting Sysdig Runtime Security installation...'; cp /root/install-agent.sh ${AGENT_HOME}/install-agent.sh; chmod +x ${AGENT_HOME}/install-agent.sh; ${AGENT_HOME}/install-agent.sh -a ${SECURE_API_TOKEN} -c ${COLLECTOR_ENDPOINT} --collector_port ${COLLECTOR_PORT} --tags ${TAG_DATA} --secure true --additional_conf 'sysdig_api_endpoint: ${COLLECTOR_ENDPOINT}\\nhost_scanner:\\n enabled: true\\n scan_on_start: true\\nkspm_analyzer:\\n enabled: true'; exit $?"/>
+    </command>
   </step-type>
 
 </plugin>
