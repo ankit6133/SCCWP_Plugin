@@ -38,4 +38,4 @@ This process starts runtime scanning and updates continuous results on the SCCWP
 
 After the process runs, check the logs for details on the number of critical, high, medium, and low vulnerabilities. It also provides details on policy violations and recommendations.
 
-You can use DeVOps Deploy feature and "Add Version links for components" to access the SCC WP dashboards seamlessly, which offer in-depth information about static and runtime vulnerabilities.
+You can use DeVOps Deploy feature and "Add Version links for components" to access the SCC WP dashboards seamlessly, which offer in-depth information about static and runtime vulnerabilities. (Note: Please login to your IBM account before clicking on the dashboards link. This is intended behaiour)
